@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 using namespace std;
+
 // ============================================================
 //  KONSTANTA
 // ============================================================
@@ -78,6 +79,54 @@ void insertLastAkun(NodeAkun*& head, Akun a) {
         curr = curr->next;
     }
     curr->next = newNode;
+}
+
+void freeListMobil(NodeMobil*& head) {
+    while (head) {
+        NodeMobil* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+NodeMobil* copyListMobil(NodeMobil* head) {
+    if (!head) return NULL;
+    NodeMobil* newHead = new NodeMobil{head->data, NULL};
+    NodeMobil* curr = head->next;
+    NodeMobil* tail = newHead;
+    while (curr) {
+        tail->next = new NodeMobil{curr->data, NULL};
+        tail = tail->next;
+        curr = curr->next;
+    }
+    return newHead;
+}
+
+// Fungsi helper agar sorting tetap bisa menggunakan index (O(N) traversal per akses)
+NodeMobil* getNodeAt(NodeMobil* head, int index) {
+    NodeMobil* curr = head;
+    for (int i = 0; i < index && curr != NULL; i++) {
+        curr = curr->next;
+    }
+    return curr;
+}
+
+// ============================================================
+//  FUNGSI-FUNGSI PEMBANTU UTILITIES
+// ============================================================
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void pauseScreen() {
+    printf("\n  Tekan Enter untuk melanjutkan...");
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    getchar();
 }
 
 int main(){
