@@ -13,7 +13,6 @@ using namespace std;
 // ============================================================
 //  STRUCT DATA & LINKED LIST NODE
 // ============================================================
-
 struct Mobil {
     char id[MAX_STR];     
     char nama[MAX_STR];   
@@ -54,7 +53,6 @@ int jumlahAkun = 0;
 // ============================================================
 //  FUNGSI PEMBANTU LINKED LIST
 // ============================================================
-
 void insertLastMobil(NodeMobil*& head, Mobil m) {
     NodeMobil* newNode = new NodeMobil{m, NULL};
     if (!head) {
@@ -221,6 +219,85 @@ void printTitle(const char* judul, int lebar) {
 // Contoh: MB1001, MB1002, MB1003, dst.
 void generateID(char* hasil) {
     sprintf(hasil, "MB%04d", jumlahMobil + 1001);
+}
+
+// ============================================================
+//  ERROR HANDLING INPUT
+// ============================================================
+int bacaInt(int* hasil) {
+    char buf[MAX_STR];
+    if (!fgets(buf, MAX_STR, stdin)) return 0;
+    buf[strcspn(buf, "\n")] = '\0';
+    if (strlen(buf) == 0) return 0;
+    int mulai = 0;
+    if (buf[0] == '-') mulai = 1;
+    if (mulai == 1 && strlen(buf) == 1) return 0;
+    for (int i = mulai; buf[i] != '\0'; i++) {
+        if (buf[i] < '0' || buf[i] > '9') {
+            printf("  [!] Input tidak valid! Harap masukkan angka.\n");
+            return 0;
+        }
+    }
+    *hasil = atoi(buf);
+    return 1;
+}
+
+int bacaDouble(double* hasil) {
+    char buf[MAX_STR];
+    if (!fgets(buf, MAX_STR, stdin)) return 0;
+    buf[strcspn(buf, "\n")] = '\0';
+    if (strlen(buf) == 0) return 0;
+    int titikCount = 0;
+    int mulai = 0;
+    if (buf[0] == '-') mulai = 1;
+    if (mulai == 1 && strlen(buf) == 1) return 0;
+    for (int i = mulai; buf[i] != '\0'; i++) {
+        if (buf[i] == '.') {
+            titikCount++;
+            if (titikCount > 1) {
+                printf("  [!] Input tidak valid! Format angka salah.\n");
+                return 0;
+            }
+        } else if (buf[i] < '0' || buf[i] > '9') {
+            printf("  [!] Input tidak valid! Harap masukkan angka.\n");
+            return 0;
+        }
+    }
+    *hasil = atof(buf);
+    return 1;
+}
+
+int bacaMenu(int* hasil) {
+    char buf[MAX_STR];
+    if (!fgets(buf, MAX_STR, stdin)) return 0;
+    buf[strcspn(buf, "\n")] = '\0';
+    if (strlen(buf) == 0) {
+        printf("  [!] Pilihan tidak boleh kosong!\n");
+        return 0;
+    }
+    for (int i = 0; buf[i] != '\0'; i++) {
+        if (buf[i] < '0' || buf[i] > '9') {
+            printf("  [!] Pilihan tidak valid! Masukkan angka menu saja.\n");
+            return 0;
+        }
+    }
+    *hasil = atoi(buf);
+    return 1;
+}
+
+int bacaString(char* hasil, int maxLen, const char* labelField) {
+    fgets(hasil, maxLen, stdin);
+    hasil[strcspn(hasil, "\n")] = '\0';
+    if (strlen(hasil) == 0) {
+        printf("  [!] %s tidak boleh kosong!\n", labelField);
+        return 0;
+    }
+    return 1;
+}
+
+void bacaStringOpsional(char* hasil, int maxLen) {
+    fgets(hasil, maxLen, stdin);
+    hasil[strcspn(hasil, "\n")] = '\0';
 }
 
 int main(){
