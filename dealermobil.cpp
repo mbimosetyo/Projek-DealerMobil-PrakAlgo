@@ -129,6 +129,100 @@ void pauseScreen() {
     getchar();
 }
 
+// Membersihkan sisa input yang tertinggal di buffer keyboard
+void flushInput() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+// Mengubah semua huruf besar menjadi huruf kecil
+// Contoh: "TOYOTA" -> "toyota"
+void toLowerStr(const char* src, char* dst) {
+    int i = 0;
+    while (src[i] != '\0') {
+        if (src[i] >= 'A' && src[i] <= 'Z')
+            dst[i] = src[i] + 32;
+        else
+            dst[i] = src[i];
+        i++;
+    }
+    dst[i] = '\0';
+}
+
+// Bandingkan dua string tanpa membedakan huruf besar/kecil
+// Mengembalikan 0 jika sama, nonzero jika berbeda
+int strCmpCI(const char* a, const char* b) {
+    char la[MAX_STR], lb[MAX_STR];
+    toLowerStr(a, la);
+    toLowerStr(b, lb);
+    return strcmp(la, lb);
+}
+
+// Mengecek apakah teks 'needle' ada di dalam 'haystack'
+// Pencarian tidak membedakan huruf besar/kecil
+int containsStr(const char* haystack, const char* needle) {
+    char h[MAX_STR], n[MAX_STR];
+    toLowerStr(haystack, h);
+    toLowerStr(needle, n);
+    return strstr(h, n) != NULL;
+}
+
+// Memformat angka menjadi format Rupiah
+// Contoh: 200000000 -> "Rp 200.000.000"
+void formatRupiah(double angka, char* hasil) {
+    char buf[64];
+    sprintf(buf, "%.0f", angka);
+
+    int panjang = strlen(buf);
+    int hitungTitik = 0;
+    int j = 0;
+    char balik[64];
+
+    for (int i = panjang - 1; i >= 0; i--) {
+        if (hitungTitik > 0 && hitungTitik % 3 == 0)
+            balik[j++] = '.';
+        balik[j++] = buf[i];
+        hitungTitik++;
+    }
+    balik[j] = '\0';
+
+    char out[64];
+    int panjangBalik = strlen(balik);
+    for (int i = 0; i < panjangBalik; i++)
+        out[i] = balik[panjangBalik - 1 - i];
+    out[panjangBalik] = '\0';
+
+    sprintf(hasil, "Rp %s", out);
+}
+
+// Mencetak garis pembatas
+void printBorder(int lebar) {
+    for (int i = 0; i < lebar; i++) printf("=");
+    printf("\n");
+}
+
+// Mencetak garis tipis
+void printLine(int lebar) {
+    for (int i = 0; i < lebar; i++) printf("-");
+    printf("\n");
+}
+
+// Mencetak judul yang rata tengah dengan garis di atas dan bawah
+void printTitle(const char* judul, int lebar) {
+    printBorder(lebar);
+    int panjangJudul = strlen(judul);
+    int padding = (lebar - panjangJudul) / 2;
+    for (int i = 0; i < padding; i++) printf(" ");
+    printf("%s\n", judul);
+    printBorder(lebar);
+}
+
+// Membuat ID otomatis untuk mobil baru
+// Contoh: MB1001, MB1002, MB1003, dst.
+void generateID(char* hasil) {
+    sprintf(hasil, "MB%04d", jumlahMobil + 1001);
+}
+
 int main(){
 
     return 0;
