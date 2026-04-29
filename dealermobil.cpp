@@ -300,6 +300,46 @@ void bacaStringOpsional(char* hasil, int maxLen) {
     hasil[strcspn(hasil, "\n")] = '\0';
 }
 
+// ============================================================
+//  FUNGSI SIMPAN DAN MUAT FILE 
+// ============================================================
+void simpanMobil() {
+    FILE* f = fopen("mobil.dat", "w");
+    if (!f) return;
+    NodeMobil* curr = headMobil;
+    while (curr) {
+        fprintf(f, "%s|%s|%s|%s|%d|%.0f|%d\n",
+                curr->data.id, curr->data.nama, curr->data.tipe, 
+                curr->data.warna, curr->data.tahun, curr->data.harga, curr->data.stok);
+        curr = curr->next;
+    }
+    fclose(f);
+}
+
+void muatMobil() {
+    FILE* f = fopen("mobil.dat", "r");
+    if (!f) return;
+    freeListMobil(headMobil);
+    jumlahMobil = 0;
+    
+    char baris[512];
+    while (fgets(baris, sizeof(baris), f)) {
+        int panjang = strlen(baris);
+        if (panjang > 0 && baris[panjang - 1] == '\n') baris[panjang - 1] = '\0';
+        Mobil m;
+        char* tok = strtok(baris, "|"); if (!tok) continue; strcpy(m.id,    tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; strcpy(m.nama,  tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; strcpy(m.tipe,  tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; strcpy(m.warna, tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; m.tahun = atoi(tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; m.harga = atof(tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; m.stok  = atoi(tok);
+        insertLastMobil(headMobil, m);
+        jumlahMobil++;
+    }
+    fclose(f);
+}
+
 int main(){
 
     return 0;
