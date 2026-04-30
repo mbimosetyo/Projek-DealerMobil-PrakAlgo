@@ -340,6 +340,163 @@ void muatMobil() {
     fclose(f);
 }
 
+void simpanAkun() {
+    FILE* f = fopen("akun.dat", "w");
+    if (!f) return;
+    NodeAkun* curr = headAkun;
+    while (curr) {
+        fprintf(f, "%s|%s|%s\n",
+                curr->data.username,
+                curr->data.password,
+                curr->data.nama_lengkap);
+        curr = curr->next;
+    }
+    fclose(f);
+}
+
+void muatAkun() {
+    FILE* f = fopen("akun.dat", "r");
+    if (!f) return;
+    
+    while(headAkun) {
+        NodeAkun* temp = headAkun;
+        headAkun = headAkun->next;
+        delete temp;
+    }
+    jumlahAkun = 0;
+    
+    char baris[512];
+    while (fgets(baris, sizeof(baris), f)) {
+        int panjang = strlen(baris);
+        if (panjang > 0 && baris[panjang - 1] == '\n') baris[panjang - 1] = '\0';
+        Akun a;
+        char* tok = strtok(baris, "|"); if (!tok) continue; strcpy(a.username,     tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; strcpy(a.password,      tok);
+        tok = strtok(NULL, "|");        if (!tok) continue; strcpy(a.nama_lengkap,  tok);
+        insertLastAkun(headAkun, a);
+        jumlahAkun++;
+    }
+    fclose(f);
+}
+
+// ============================================================
+//  FUNGSI CETAK TABEL MOBIL
+// ============================================================
+void cetakHeaderMobil() {
+    printf("%-8s %-22s %-12s %-10s %-6s %-18s %-6s\n",
+           "ID", "Nama Mobil", "Tipe", "Warna", "Tahun", "Harga", "Stok");
+    printLine(86);
+}
+
+void cetakBarisMobil(const Mobil& m) {
+    char rp[32];
+    formatRupiah(m.harga, rp);
+    printf("%-8s %-22s %-12s %-10s %-6d %-18s %-6d\n",
+           m.id, m.nama, m.tipe, m.warna, m.tahun, rp, m.stok);
+}
+
+// ============================================================
+//  FUNGSI INPUT MOBIL
+// ============================================================
+void inputMobil() {
+    clearScreen();
+    printTitle("  INPUT DATA MOBIL  ", 60);
+
+    int jumlahInput = 0;
+    printf("  Ingin menambah berapa data mobil? : ");
+
+    while (!bacaInt(&jumlahInput) || jumlahInput <= 0) {
+        printf("  [!] Masukkan angka positif: ");
+    }
+
+    for (int loop = 0; loop < jumlahInput; loop++) {
+        clearScreen();
+        printTitle("  INPUT DATA MOBIL  ", 60);
+        printf("  Data ke-%d dari %d\n\n", loop + 1, jumlahInput);
+
+        Mobil m;
+        generateID(m.id);
+        printf("  ID otomatis : %s\n\n", m.id);
+
+        printf("  Nama Mobil  : ");
+        while (!bacaString(m.nama, MAX_STR, "Nama Mobil")) {
+            printf("  Nama Mobil  : ");
+        }
+
+        printf("  Tipe (Sedan/SUV/MPV/Truck/Hatchback): ");
+        while (!bacaString(m.tipe, MAX_STR, "Tipe")) {
+            printf("  Tipe: ");
+        }
+
+        printf("  Warna       : ");
+        while (!bacaString(m.warna, MAX_STR, "Warna")) {
+            printf("  Warna       : ");
+        }
+
+        printf("  Tahun       : ");
+        while (!bacaInt(&m.tahun) || m.tahun < 1900 || m.tahun > 2100) {
+            if (m.tahun < 1900 || m.tahun > 2100)
+                printf("  [!] Tahun harus antara 1900-2100: ");
+            else
+                printf("  Tahun       : ");
+        }
+
+        printf("  Harga (Rp)  : ");
+        while (!bacaDouble(&m.harga) || m.harga <= 0) {
+            if (m.harga <= 0)
+                printf("  [!] Harga harus lebih dari 0: ");
+            else
+                printf("  Harga (Rp)  : ");
+        }
+
+        printf("  Stok        : ");
+        while (!bacaInt(&m.stok) || m.stok < 0) {
+            if (m.stok < 0)
+                printf("  [!] Stok tidak boleh negatif: ");
+            else
+                printf("  Stok        : ");
+        }
+
+        insertLastMobil(headMobil, m);
+        jumlahMobil++;
+        simpanMobil();
+        printf("\n  [v] Data ke-%d berhasil ditambahkan!\n", loop + 1);
+
+        if (loop < jumlahInput - 1) {
+            printf("  Lanjut ke data berikutnya...\n");
+            printf("  Tekan Enter untuk melanjutkan...");
+            getchar();
+        }
+    }
+
+    printf("\n  [v] Total %d data berhasil ditambahkan!\n", jumlahInput);
+    pauseScreen();
+}
+
+// ============================================================
+//  FUNGSI OUTPUT MOBIL
+// ============================================================
+void outputMobil(NodeMobil* head, int n) {
+    clearScreen();
+    printTitle("  DATA MOBIL DEALER  ", 86);
+
+    if (n == 0 || head == NULL) {
+        printf("  Tidak ada data mobil.\n");
+        pauseScreen();
+        return;
+    }
+
+    cetakHeaderMobil();
+    NodeMobil* curr = head;
+    while(curr) {
+        cetakBarisMobil(curr->data);
+        curr = curr->next;
+    }
+    printBorder(86);
+    printf("  Total: %d unit\n", n);
+    pauseScreen();
+}
+
 int main(){
 
     return 0;
