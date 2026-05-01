@@ -497,6 +497,39 @@ void outputMobil(NodeMobil* head, int n) {
     pauseScreen();
 }
 
+// ============================================================
+//  FUNGSI-FUNGSI SORTING (PENGURUTAN)
+// ============================================================
+
+void swapMobil(Mobil& a, Mobil& b) {
+    Mobil sementara = a;
+    a = b;
+    b = sementara;
+}
+
+// Bandingkan dua mobil — case insensitive untuk field teks
+int compareField(const Mobil& a, const Mobil& b, int field) {
+    char sa[MAX_STR], sb[MAX_STR];
+    switch (field) {
+        case 0:
+            toLowerStr(a.nama,  sa); toLowerStr(b.nama,  sb);
+            return strcmp(sa, sb);
+        case 1:
+            toLowerStr(a.tipe,  sa); toLowerStr(b.tipe,  sb);
+            return strcmp(sa, sb);
+        case 2:
+            toLowerStr(a.warna, sa); toLowerStr(b.warna, sb);
+            return strcmp(sa, sb);
+        case 3:
+            return (a.tahun < b.tahun) ? -1 : (a.tahun > b.tahun) ? 1 : 0;
+        case 4:
+            return (a.harga < b.harga) ? -1 : (a.harga > b.harga) ? 1 : 0;
+        case 5:
+            return (a.stok  < b.stok)  ? -1 : (a.stok  > b.stok)  ? 1 : 0;
+        default: return 0;
+    }
+}
+
 int main(){
 
     return 0;
