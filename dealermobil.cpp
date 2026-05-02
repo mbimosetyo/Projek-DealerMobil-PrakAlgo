@@ -500,7 +500,6 @@ void outputMobil(NodeMobil* head, int n) {
 // ============================================================
 //  FUNGSI-FUNGSI SORTING (PENGURUTAN)
 // ============================================================
-
 void swapMobil(Mobil& a, Mobil& b) {
     Mobil sementara = a;
     a = b;
@@ -527,6 +526,41 @@ int compareField(const Mobil& a, const Mobil& b, int field) {
         case 5:
             return (a.stok  < b.stok)  ? -1 : (a.stok  > b.stok)  ? 1 : 0;
         default: return 0;
+    }
+}
+
+bool shouldSwap(const Mobil& a, const Mobil& b, int field, bool asc) {
+    int hasil = compareField(a, b, field);
+    return asc ? (hasil > 0) : (hasil < 0);
+}
+
+// --- 1. Bubble Sort ---
+void bubbleSort(NodeMobil* head, int n, int field, bool asc) {
+    for (int i = 0; i < n - 1; i++) {
+        NodeMobil* curr = head;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (shouldSwap(curr->data, curr->next->data, field, asc)) {
+                swapMobil(curr->data, curr->next->data);
+            }
+            curr = curr->next;
+        }
+    }
+}
+
+// --- 2. Selection Sort ---
+void selectionSort(NodeMobil* head, int n, int field, bool asc) {
+    NodeMobil* curr = head;
+    while (curr != NULL) {
+        NodeMobil* minNode = curr;
+        NodeMobil* temp = curr->next;
+        while (temp != NULL) {
+            if (shouldSwap(minNode->data, temp->data, field, asc)) {
+                minNode = temp;
+            }
+            temp = temp->next;
+        }
+        swapMobil(curr->data, minNode->data);
+        curr = curr->next;
     }
 }
 
