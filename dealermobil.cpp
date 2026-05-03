@@ -564,6 +564,161 @@ void selectionSort(NodeMobil* head, int n, int field, bool asc) {
     }
 }
 
+// --- 3. Insertion Sort ---
+void insertionSort(Mobil arr[], int n, int field, bool asc) {
+    for (int i = 1; i < n; i++) {
+        Mobil kunci = arr[i];
+        int j = i - 1;
+        while (j >= 0 && shouldSwap(arr[j], kunci, field, asc)) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = kunci;
+    }
+}
+
+// --- 4. Shell Sort ---
+void shellSort(Mobil arr[], int n, int field, bool asc) {
+    for (int gap = n / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            Mobil temp = arr[i];
+            int j = i;
+            while (j >= gap && shouldSwap(arr[j - gap], temp, field, asc)) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            arr[j] = temp;
+        }
+    }
+}
+
+// --- 5. Quick Sort ---
+int partisi(Mobil arr[], int kiri, int kanan, int field, bool asc) {
+    Mobil pivot = arr[kanan];
+    int i = kiri - 1;
+    for (int j = kiri; j < kanan; j++) {
+        if (!shouldSwap(arr[j], pivot, field, asc)) {
+            i++;
+            swapMobil(arr[i], arr[j]);
+        }
+    }
+    swapMobil(arr[i + 1], arr[kanan]);
+    return i + 1;
+}
+
+void quickSort(Mobil arr[], int kiri, int kanan, int field, bool asc) {
+    if (kiri < kanan) {
+        int pos = partisi(arr, kiri, kanan, field, asc);
+        quickSort(arr, kiri,    pos - 1, field, asc);
+        quickSort(arr, pos + 1, kanan,   field, asc);
+    }
+}
+
+// --- 6. Merge Sort ---
+void mergeParts(Mobil arr[], int kiri, int tengah, int kanan, int field, bool asc) {
+    int n1 = tengah - kiri + 1;
+    int n2 = kanan - tengah;
+    static Mobil L[MAX_MOBIL], R[MAX_MOBIL];
+    for (int i = 0; i < n1; i++) L[i] = arr[kiri + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[tengah + 1 + j];
+    int i = 0, j = 0, k = kiri;
+    while (i < n1 && j < n2) {
+        if (!shouldSwap(L[i], R[j], field, asc))
+            arr[k++] = L[i++];
+        else
+            arr[k++] = R[j++];
+    }
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
+}
+
+void mergeSort(Mobil arr[], int kiri, int kanan, int field, bool asc) {
+    if (kiri < kanan) {
+        int tengah = (kiri + kanan) / 2;
+        mergeSort(arr, kiri,      tengah, field, asc);
+        mergeSort(arr, tengah + 1, kanan, field, asc);
+        mergeParts(arr, kiri, tengah, kanan, field, asc);
+    }
+}
+
+//  MENU SORTING
+
+void menuSorting() {
+    int pil, pilArah;
+
+    while (1) {
+        clearScreen();
+        printTitle("  SORTING DATA MOBIL  ", 60);
+        printf("  Urutkan berdasarkan:\n\n");
+        printf("  1. Nama Mobil   (Bubble Sort)\n");
+        printf("  2. Tipe Mobil   (Selection Sort)\n");
+        printf("  3. Warna        (Insertion Sort)\n");
+        printf("  4. Tahun        (Shell Sort)\n");
+        printf("  5. Harga        (Quick Sort)\n");
+        printf("  6. Stok         (Merge Sort)\n");
+        printf("  0. Kembali\n");
+        printBorder(60);
+        printf("  Pilihan: ");
+
+        // Error handling pilihan menu
+        if (!bacaMenu(&pil)) { pauseScreen(); continue; }
+        if (pil == 0) return;
+        if (pil < 1 || pil > 6) {
+            printf("  [!] Pilihan harus antara 0-6!\n");
+            pauseScreen();
+            continue;
+        }
+
+        clearScreen();
+        printTitle("  ARAH PENGURUTAN  ", 60);
+        printf("  1. Ascending  (A-Z / Kecil ke Besar)\n");
+        printf("  2. Descending (Z-A / Besar ke Kecil)\n");
+        printf("  0. Kembali\n");
+        printBorder(60);
+        printf("  Pilihan: ");
+
+        if (!bacaMenu(&pilArah)) { pauseScreen(); continue; }
+        if (pilArah == 0) continue;
+        if (pilArah < 1 || pilArah > 2) {
+            printf("  [!] Pilihan harus 1 atau 2!\n");
+            pauseScreen();
+            continue;
+        }
+
+        bool asc   = (pilArah == 1);
+        int  field = pil - 1;
+
+        const char* fieldNama[] = {"Nama","Tipe","Warna","Tahun","Harga","Stok"};
+        const char* metNama[]   = {"Bubble Sort","Selection Sort","Insertion Sort",
+                                    "Shell Sort","Quick Sort","Merge Sort"};
+        const char* arahNama   = asc ? "Ascending" : "Descending";
+
+         // salin ke array sementara biar data asli tidak berubah
+        static Mobil tmp[MAX_MOBIL];
+        for (int i = 0; i < jumlahMobil; i++) tmp[i] = dataMobil[i];
+
+        switch (pil) {
+            case 1: bubbleSort   (tmp, jumlahMobil, field, asc);             break;
+            case 2: selectionSort(tmp, jumlahMobil, field, asc);             break;
+            case 3: insertionSort(tmp, jumlahMobil, field, asc);             break;
+            case 4: shellSort    (tmp, jumlahMobil, field, asc);             break;
+            case 5: quickSort    (tmp, 0, jumlahMobil - 1, field, asc);      break;
+            case 6: mergeSort    (tmp, 0, jumlahMobil - 1, field, asc);      break;
+        }
+
+        clearScreen();
+        char judulBuf[120];
+        sprintf(judulBuf, "HASIL %s by %s [%s]",
+                metNama[field], fieldNama[field], arahNama);
+        printTitle(judulBuf, 86);
+        cetakHeaderMobil();
+        for (int i = 0; i < jumlahMobil; i++) cetakBarisMobil(tmp[i]);
+        printBorder(86);
+        printf("  Total: %d unit\n", jumlahMobil);
+        pauseScreen();
+    }
+}
+
 int main(){
 
     return 0;
