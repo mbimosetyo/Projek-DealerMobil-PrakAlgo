@@ -126,15 +126,10 @@ void pauseScreen() {
     while ((c = getchar()) != '\n' && c != EOF);
     getchar();
 }
-
-// Membersihkan sisa input yang tertinggal di buffer keyboard
 void flushInput() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
-
-// Mengubah semua huruf besar menjadi huruf kecil
-// Contoh: "TOYOTA" -> "toyota"
 void toLowerStr(const char* src, char* dst) {
     int i = 0;
     while (src[i] != '\0') {
@@ -146,27 +141,18 @@ void toLowerStr(const char* src, char* dst) {
     }
     dst[i] = '\0';
 }
-
-// Bandingkan dua string tanpa membedakan huruf besar/kecil
-// Mengembalikan 0 jika sama, nonzero jika berbeda
 int strCmpCI(const char* a, const char* b) {
     char la[MAX_STR], lb[MAX_STR];
     toLowerStr(a, la);
     toLowerStr(b, lb);
     return strcmp(la, lb);
 }
-
-// Mengecek apakah teks 'needle' ada di dalam 'haystack'
-// Pencarian tidak membedakan huruf besar/kecil
 int containsStr(const char* haystack, const char* needle) {
     char h[MAX_STR], n[MAX_STR];
     toLowerStr(haystack, h);
     toLowerStr(needle, n);
     return strstr(h, n) != NULL;
 }
-
-// Memformat angka menjadi format Rupiah
-// Contoh: 200000000 -> "Rp 200.000.000"
 void formatRupiah(double angka, char* hasil) {
     char buf[64];
     sprintf(buf, "%.0f", angka);
@@ -192,20 +178,14 @@ void formatRupiah(double angka, char* hasil) {
 
     sprintf(hasil, "Rp %s", out);
 }
-
-// Mencetak garis pembatas
 void printBorder(int lebar) {
     for (int i = 0; i < lebar; i++) printf("=");
     printf("\n");
 }
-
-// Mencetak garis tipis
 void printLine(int lebar) {
     for (int i = 0; i < lebar; i++) printf("-");
     printf("\n");
 }
-
-// Mencetak judul yang rata tengah dengan garis di atas dan bawah
 void printTitle(const char* judul, int lebar) {
     printBorder(lebar);
     int panjangJudul = strlen(judul);
@@ -214,9 +194,6 @@ void printTitle(const char* judul, int lebar) {
     printf("%s\n", judul);
     printBorder(lebar);
 }
-
-// Membuat ID otomatis untuk mobil baru
-// Contoh: MB1001, MB1002, MB1003, dst.
 void generateID(char* hasil) {
     sprintf(hasil, "MB%04d", jumlahMobil + 1001);
 }
@@ -563,16 +540,6 @@ void selectionSort(NodeMobil* head, int n, int field, bool asc) {
         curr = curr->next;
     }
 }
-
-void mergeSort(Mobil arr[], int kiri, int kanan, int field, bool asc) {
-    if (kiri < kanan) {
-        int tengah = (kiri + kanan) / 2;
-        mergeSort(arr, kiri,      tengah, field, asc);
-        mergeSort(arr, tengah + 1, kanan, field, asc);
-        mergeParts(arr, kiri, tengah, kanan, field, asc);
-    }
-}
-
 // ============================================================
 //  MENU SORTING
 // ============================================================
@@ -644,6 +611,163 @@ void menuSorting() {
         printf("  Total: %d unit\n", jumlahMobil);
         
         freeListMobil(tmp); // Hapus list temp dari memori
+        pauseScreen();
+    }
+}
+
+// ============================================================
+//  FUNGSI-FUNGSI SEARCHING (PENCARIAN)
+// ============================================================
+int sequentialSearch(const char* kata_kunci, NodeMobil*& hasilHead) {
+    int count = 0;
+    NodeMobil* curr = headMobil;
+    while (curr) {
+        if (containsStr(curr->data.nama, kata_kunci)) {
+            insertLastMobil(hasilHead, curr->data);
+            count++;
+        }
+        curr = curr->next;
+    }
+    return count;
+}
+
+int binarySearch(const char* kata_kunci, NodeMobil*& hasilHead) {
+    NodeMobil* tmpHead = copyListMobil(headMobil);
+    bubbleSort(tmpHead, jumlahMobil, 1, true); 
+
+    char kw[MAX_STR], fieldStr[MAX_STR];
+    toLowerStr(kata_kunci, kw);
+
+    int lo = 0, hi = jumlahMobil - 1, tengah = -1;
+    while (lo <= hi) {
+        int mid = (lo + hi) / 2;
+        toLowerStr(getNodeAt(tmpHead, mid)->data.tipe, fieldStr);
+        int cmp = strcmp(fieldStr, kw);
+        if      (cmp == 0) { tengah = mid; break; }
+        else if (cmp < 0)    lo = mid + 1;
+        else                 hi = mid - 1;
+    }
+
+    if (tengah == -1) {
+        freeListMobil(tmpHead);
+        return 0;
+    }
+
+    int count = 0;
+    insertLastMobil(hasilHead, getNodeAt(tmpHead, tengah)->data);
+    count++;
+
+    // Cari ke kiri
+    for (int i = tengah - 1; i >= 0; i--) {
+        toLowerStr(getNodeAt(tmpHead, i)->data.tipe, fieldStr);
+        if (strcmp(fieldStr, kw) == 0) { insertLastMobil(hasilHead, getNodeAt(tmpHead, i)->data); count++; }
+        else break;
+    }
+    // Cari ke kanan
+    for (int i = tengah + 1; i < jumlahMobil; i++) {
+        toLowerStr(getNodeAt(tmpHead, i)->data.tipe, fieldStr);
+        if (strcmp(fieldStr, kw) == 0) { insertLastMobil(hasilHead, getNodeAt(tmpHead, i)->data); count++; }
+        else break;
+    }
+    
+    freeListMobil(tmpHead);
+    return count;
+}
+
+// ============================================================
+//  MENU SEARCHING
+// ============================================================
+
+void menuSearching() {
+    int pil, pilArah;
+
+    while (1) {
+        clearScreen();
+        printTitle("  SEARCH DATA MOBIL  ", 60);
+        printf("  Cari berdasarkan:\n\n");
+        printf("  1. Nama Mobil  (Sequential Search)\n");
+        printf("  2. Tipe Mobil  (Binary Search)\n");
+        printf("  0. Kembali\n");
+        printBorder(60);
+        printf("  Pilihan: ");
+
+        if (!bacaMenu(&pil)) { pauseScreen(); continue; }
+        if (pil == 0) return;
+        if (pil < 1 || pil > 2) {
+            printf("  [!] Pilihan harus 0, 1, atau 2!\n");
+            pauseScreen();
+            continue;
+        }
+
+        clearScreen();
+        printTitle("  URUTAN HASIL PENCARIAN  ", 60);
+        printf("  1. Ascending  (A-Z)\n");
+        printf("  2. Descending (Z-A)\n");
+        printf("  0. Kembali\n");
+        printBorder(60);
+        printf("  Pilihan: ");
+
+        if (!bacaMenu(&pilArah)) { pauseScreen(); continue; }
+        if (pilArah == 0) continue;
+        if (pilArah < 1 || pilArah > 2) {
+            printf("  [!] Pilihan harus 1 atau 2!\n");
+            pauseScreen();
+            continue;
+        }
+
+        bool asc = (pilArah == 1);
+        const char* arahNama = asc ? "Ascending" : "Descending";
+
+        char kata_kunci[MAX_STR];
+        printf("\n  Masukkan kata kunci: ");
+        while (!bacaString(kata_kunci, MAX_STR, "Kata kunci")) {
+            printf("  Masukkan kata kunci: ");
+        }
+
+        clearScreen();
+        char judulBuf[80];
+        
+        NodeMobil* hasilHead = NULL;
+
+        if (pil == 1) {
+            sprintf(judulBuf, "HASIL Sequential Search by Nama [%s]", arahNama);
+            printTitle(judulBuf, 86);
+            printf("  Keyword: \"%s\" (case insensitive)\n\n", kata_kunci);
+
+            int count = sequentialSearch(kata_kunci, hasilHead);
+
+            if (count == 0) {
+                printf("  Data tidak ditemukan untuk: \"%s\"\n", kata_kunci);
+            } else {
+                bubbleSort(hasilHead, count, 0, asc); // Menggunakan Bubble Sort
+                cetakHeaderMobil();
+                NodeMobil* curr = hasilHead;
+                while(curr) { cetakBarisMobil(curr->data); curr = curr->next; }
+                printBorder(86);
+                printf("  Ditemukan %d data.\n", count);
+            }
+
+        } else {
+            sprintf(judulBuf, "HASIL Binary Search by Tipe [%s]", arahNama);
+            printTitle(judulBuf, 86);
+            printf("  Keyword: \"%s\" (case insensitive)\n\n", kata_kunci);
+
+            int count = binarySearch(kata_kunci, hasilHead);
+
+            if (count == 0) {
+                printf("  Data tidak ditemukan untuk: \"%s\"\n", kata_kunci);
+                printf("  Catatan: Binary Search membutuhkan kata kunci TEPAT (contoh: \"SUV\")\n");
+            } else {
+                selectionSort(hasilHead, count, 1, asc); // Menggunakan Selection Sort
+                cetakHeaderMobil();
+                NodeMobil* curr = hasilHead;
+                while(curr) { cetakBarisMobil(curr->data); curr = curr->next; }
+                printBorder(86);
+                printf("  Ditemukan %d data.\n", count);
+            }
+        }
+        
+        freeListMobil(hasilHead);
         pauseScreen();
     }
 }
