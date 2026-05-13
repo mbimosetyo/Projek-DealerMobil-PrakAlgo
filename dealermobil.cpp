@@ -677,7 +677,6 @@ int binarySearch(const char* kata_kunci, NodeMobil*& hasilHead) {
 // ============================================================
 //  MENU SEARCHING
 // ============================================================
-
 void menuSearching() {
     int pil, pilArah;
 
@@ -768,6 +767,88 @@ void menuSearching() {
         }
         
         freeListMobil(hasilHead);
+        pauseScreen();
+    }
+}
+
+// ============================================================
+//  FUNGSI DELETE (HAPUS) DATA MOBIL
+// ============================================================
+void deleteMobil() {
+    char idCari[MAX_STR];
+    char konfirmasi[MAX_STR];
+
+    while (1) {
+        clearScreen();
+        printTitle("  DELETE DATA MOBIL  ", 60);
+
+        if (jumlahMobil == 0) {
+            printf("  Tidak ada data untuk dihapus.\n");
+            pauseScreen();
+            return;
+        }
+
+        outputMobil(headMobil, jumlahMobil);
+
+        printf("\n  Masukkan ID yang akan dihapus (0=Kembali): ");
+        fgets(idCari, MAX_STR, stdin);
+        idCari[strcspn(idCari, "\n")] = '\0';
+
+        if (strcmp(idCari, "0") == 0) return;
+
+        if (strlen(idCari) == 0) {
+            printf("  [!] ID tidak boleh kosong!\n");
+            pauseScreen();
+            continue;
+        }
+
+        NodeMobil* curr = headMobil;
+        NodeMobil* prev = NULL;
+        
+        while (curr != NULL) {
+            if (strCmpCI(curr->data.id, idCari) == 0) {
+                break;
+            }
+            prev = curr;
+            curr = curr->next;
+        }
+
+        if (curr == NULL) {
+            printf("  [!] ID \"%s\" tidak ditemukan!\n", idCari);
+            pauseScreen();
+            continue;
+        }
+
+        printf("\n  Data yang akan dihapus:\n");
+        cetakHeaderMobil();
+        cetakBarisMobil(curr->data);
+        printBorder(86);
+
+        printf("\n  Yakin ingin menghapus? (y/n): ");
+        fgets(konfirmasi, MAX_STR, stdin);
+        konfirmasi[strcspn(konfirmasi, "\n")] = '\0';
+
+        if (strlen(konfirmasi) == 0 ||
+           (konfirmasi[0] != 'y' && konfirmasi[0] != 'Y' &&
+            konfirmasi[0] != 'n' && konfirmasi[0] != 'N')) {
+            printf("  [!] Jawaban tidak valid! Ketik y atau n.\n");
+            pauseScreen();
+            continue;
+        }
+
+        if (konfirmasi[0] == 'y' || konfirmasi[0] == 'Y') {
+            if (prev == NULL) {
+                headMobil = curr->next;
+            } else {
+                prev->next = curr->next;
+            }
+            delete curr;
+            jumlahMobil--;
+            simpanMobil();
+            printf("  [v] Data berhasil dihapus!\n");
+        } else {
+            printf("  Penghapusan dibatalkan.\n");
+        }
         pauseScreen();
     }
 }
