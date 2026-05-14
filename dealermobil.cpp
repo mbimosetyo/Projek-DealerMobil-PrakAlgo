@@ -853,6 +853,281 @@ void deleteMobil() {
     }
 }
 
+// ============================================================
+//  FUNGSI EDIT DATA MOBIL
+// ============================================================
+
+void editMobil() {
+    char idCari[MAX_STR];
+    char tmpBuf[MAX_STR];
+
+    while (1) {
+        clearScreen();
+        printTitle("  EDIT DATA MOBIL  ", 60);
+
+        if (jumlahMobil == 0) {
+            printf("  Tidak ada data untuk diedit.\n");
+            pauseScreen();
+            return;
+        }
+
+        outputMobil(headMobil, jumlahMobil);
+
+        printf("\n  Masukkan ID yang akan diedit (0=Kembali): ");
+        fgets(idCari, MAX_STR, stdin);
+        idCari[strcspn(idCari, "\n")] = '\0';
+
+        if (strcmp(idCari, "0") == 0) return;
+
+        if (strlen(idCari) == 0) {
+            printf("  [!] ID tidak boleh kosong!\n");
+            pauseScreen();
+            continue;
+        }
+
+        NodeMobil* curr = headMobil;
+        while (curr != NULL) {
+            if (strCmpCI(curr->data.id, idCari) == 0) {
+                break;
+            }
+            curr = curr->next;
+        }
+
+        if (curr == NULL) {
+            printf("  [!] ID \"%s\" tidak ditemukan!\n", idCari);
+            pauseScreen();
+            continue;
+        }
+
+        Mobil& m = curr->data;
+
+        printf("\n  Data saat ini:\n");
+        cetakHeaderMobil();
+        cetakBarisMobil(m);
+        printBorder(86);
+        printf("\n  (Langsung Enter = tidak diubah)\n\n");
+
+        printf("  Nama Mobil  [%s]: ", m.nama);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) strcpy(m.nama, tmpBuf);
+
+        printf("  Tipe        [%s]: ", m.tipe);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) strcpy(m.tipe, tmpBuf);
+
+        printf("  Warna       [%s]: ", m.warna);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) strcpy(m.warna, tmpBuf);
+
+        printf("  Tahun       [%d]: ", m.tahun);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) {
+            int thn = 0, valid = 1;
+            for (int i = 0; tmpBuf[i] != '\0'; i++) {
+                if (tmpBuf[i] < '0' || tmpBuf[i] > '9') { valid = 0; break; }
+            }
+            if (!valid) {
+                printf("  [!] Tahun tidak valid, tetap menggunakan nilai lama.\n");
+            } else {
+                thn = atoi(tmpBuf);
+                if (thn < 1900 || thn > 2100)
+                    printf("  [!] Tahun harus 1900-2100, tetap menggunakan nilai lama.\n");
+                else
+                    m.tahun = thn;
+            }
+        }
+
+        printf("  Harga (Rp)  [%.0f]: ", m.harga);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) {
+            int valid = 1, titikCount = 0;
+            for (int i = 0; tmpBuf[i] != '\0'; i++) {
+                if (tmpBuf[i] == '.') { titikCount++; if (titikCount > 1) { valid = 0; break; } }
+                else if (tmpBuf[i] < '0' || tmpBuf[i] > '9') { valid = 0; break; }
+            }
+            if (!valid || atof(tmpBuf) <= 0)
+                printf("  [!] Harga tidak valid, tetap menggunakan nilai lama.\n");
+            else
+                m.harga = atof(tmpBuf);
+        }
+
+        printf("  Stok        [%d]: ", m.stok);
+        bacaStringOpsional(tmpBuf, MAX_STR);
+        if (strlen(tmpBuf) > 0) {
+            int valid = 1;
+            for (int i = 0; tmpBuf[i] != '\0'; i++) {
+                if (tmpBuf[i] < '0' || tmpBuf[i] > '9') { valid = 0; break; }
+            }
+            if (!valid || atoi(tmpBuf) < 0)
+                printf("  [!] Stok tidak valid, tetap menggunakan nilai lama.\n");
+            else
+                m.stok = atoi(tmpBuf);
+        }
+
+        simpanMobil();
+        printf("\n  [v] Data berhasil diperbarui!\n");
+        pauseScreen();
+    }
+}
+
+// ============================================================
+//  MENU UTAMA
+// ============================================================
+
+void mainMenu(const char* namaUser) {
+    int pil;
+    while (1) {
+        clearScreen();
+        printf("\n");
+        printTitle("  SISTEM DEALER MOBIL NUSANTARA  ", 60);
+        printf("  Selamat datang, %s\n\n", namaUser);
+        printf("  1. Input Data Mobil\n");
+        printf("  2. Output Data Mobil\n");
+        printf("  3. Sorting Data Mobil\n");
+        printf("  4. Search Data Mobil\n");
+        printf("  5. Delete Data Mobil\n");
+        printf("  6. Edit Data Mobil\n");
+        printf("  7. Keluar\n");
+        printBorder(50);
+        printf("  Masukkan Menu : ");
+
+        if (!bacaMenu(&pil)) { pauseScreen(); continue; }
+        if (pil < 1 || pil > 7) {
+            printf("  [!] Pilihan harus antara 1-7!\n");
+            pauseScreen();
+            continue;
+        }
+
+        switch (pil) {
+            case 1: inputMobil();                 break;
+            case 2: outputMobil(headMobil, jumlahMobil); break;
+            case 3: menuSorting();                break;
+            case 4: menuSearching();              break;
+            case 5: deleteMobil();                break;
+            case 6: editMobil();                  break;
+            case 7:
+                clearScreen();
+                printf("\n  Terima kasih! Sampai jumpa.\n\n");
+                return;
+        }
+    }
+}
+
+// ============================================================
+//  FUNGSI LOGIN & BUAT AKUN
+// ============================================================
+
+int usernameAda(const char* user) {
+    NodeAkun* curr = headAkun;
+    while (curr) {
+        if (strcmp(curr->data.username, user) == 0) return 1;
+        curr = curr->next;
+    }
+    return 0;
+}
+
+void buatAkun() {
+    clearScreen();
+    printTitle("  BUAT AKUN BARU  ", 60);
+
+    Akun a;
+    printf("  Nama Lengkap : ");
+    while (!bacaString(a.nama_lengkap, MAX_STR, "Nama Lengkap")) {
+        printf("  Nama Lengkap : ");
+    }
+
+    printf("  Username     : ");
+    while (1) {
+        if (!bacaString(a.username, MAX_STR, "Username")) {
+            printf("  Username     : ");
+            continue;
+        }
+        if (usernameAda(a.username)) {
+            printf("  [!] Username sudah dipakai! Coba username lain.\n");
+            printf("  Username     : ");
+            continue;
+        }
+        break;
+    }
+
+    printf("  Password     : ");
+    while (1) {
+        if (!bacaString(a.password, MAX_STR, "Password")) {
+            printf("  Password     : ");
+            continue;
+        }
+        if ((int)strlen(a.password) < 4) {
+            printf("  [!] Password minimal 4 karakter!\n");
+            printf("  Password     : ");
+            continue;
+        }
+        break;
+    }
+
+    insertLastAkun(headAkun, a);
+    jumlahAkun++;
+    simpanAkun();
+    printf("\n  [v] Akun berhasil dibuat! Silakan login.\n");
+    pauseScreen();
+}
+
+int login(char* namaUserOut) {
+    int percobaan = 0;
+
+    while (percobaan < MAX_LOGIN) {
+        clearScreen();
+        printTitle("  LOGIN  ", 60);
+        printf("\n  Percobaan ke-%d dari %d\n\n", percobaan + 1, MAX_LOGIN);
+
+        char user[MAX_STR], pass[MAX_STR];
+
+        printf("  Username : ");
+        if (!bacaString(user, MAX_STR, "Username")) {
+            printf("  [!] Username tidak boleh kosong!\n");
+            pauseScreen();
+            continue;
+        }
+
+        printf("  Password : ");
+        if (!bacaString(pass, MAX_STR, "Password")) {
+            printf("  [!] Password tidak boleh kosong!\n");
+            pauseScreen();
+            continue;
+        }
+
+        NodeAkun* curr = headAkun;
+        while (curr) {
+            if (strCmpCI(curr->data.username, user) == 0 &&
+                strcmp(curr->data.password, pass) == 0) {
+                strcpy(namaUserOut, curr->data.nama_lengkap);
+                return 1;
+            }
+            curr = curr->next;
+        }
+
+        percobaan++;
+        int sisa = MAX_LOGIN - percobaan;
+
+        if (sisa > 0) {
+            printf("\n  [!] Username atau password salah!\n");
+            printf("      Sisa percobaan: %d\n", sisa);
+            pauseScreen();
+        } else {
+            clearScreen();
+            printBorder(50);
+            printf("  AKSES DITOLAK!\n");
+            printBorder(50);
+            printf("\n  Anda telah salah memasukkan login\n");
+            printf("  sebanyak %d kali.\n\n", MAX_LOGIN);
+            printf("  Program akan otomatis ditutup.\n\n");
+            printBorder(50);
+            printf("\n  Tekan Enter untuk keluar...");
+            getchar();
+            exit(0);
+        }
+    }
+    return 0;
+}
 int main(){
 
     return 0;
