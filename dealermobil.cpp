@@ -856,7 +856,6 @@ void deleteMobil() {
 // ============================================================
 //  FUNGSI EDIT DATA MOBIL
 // ============================================================
-
 void editMobil() {
     char idCari[MAX_STR];
     char tmpBuf[MAX_STR];
@@ -973,7 +972,6 @@ void editMobil() {
 // ============================================================
 //  MENU UTAMA
 // ============================================================
-
 void mainMenu(const char* namaUser) {
     int pil;
     while (1) {
@@ -1016,7 +1014,6 @@ void mainMenu(const char* namaUser) {
 // ============================================================
 //  FUNGSI LOGIN & BUAT AKUN
 // ============================================================
-
 int usernameAda(const char* user) {
     NodeAkun* curr = headAkun;
     while (curr) {
@@ -1128,7 +1125,70 @@ int login(char* namaUserOut) {
     }
     return 0;
 }
+
+// ============================================================
+//  FUNGSI MAIN
+// ============================================================
 int main(){
+    muatAkun();
+    muatMobil();
+
+    if (jumlahAkun == 0) {
+        Akun a;
+        strcpy(a.username,     "admin");
+        strcpy(a.password,     "admin123");
+        strcpy(a.nama_lengkap, "Administrator");
+        insertLastAkun(headAkun, a);
+        jumlahAkun = 1;
+        simpanAkun();
+    }
+
+    int pil;
+    char namaUser[MAX_STR];
+
+    while (1) {
+        clearScreen();
+        printf("\n");
+        printTitle("  SISTEM DEALER MOBIL NUSANTARA  ", 60);
+        printf("  1. Login\n");
+        printf("  2. Buat Akun Baru\n");
+        printf("  3. Keluar\n");
+        printBorder(60);
+        printf("  Pilihan: ");
+
+        if (!bacaMenu(&pil)) {
+            pauseScreen();
+            continue;
+        }
+        if (pil < 1 || pil > 3) {
+            printf("  [!] Pilihan harus 1, 2, atau 3!\n");
+            pauseScreen();
+            continue;
+        }
+
+        if (pil == 1) {
+            int hasil = login(namaUser);
+            if (hasil) {
+                printf("\n  [v] Login berhasil! Selamat datang, %s\n", namaUser);
+                printf("\n  Tekan Enter untuk masuk ke menu utama...");
+                getchar();
+                mainMenu(namaUser);
+            }
+        } else if (pil == 2) {
+            buatAkun();
+        } else {
+            printf("\n  Sampai jumpa!\n\n");
+            break;
+        }
+    }
+
+    // Bebaskan memori sebelum program berakhir (Good Practice)
+    freeListMobil(headMobil);
+    while (headAkun) {
+        NodeAkun* temp = headAkun;
+        headAkun = headAkun->next;
+        delete temp;
+    }
 
     return 0;
 }
