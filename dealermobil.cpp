@@ -126,10 +126,7 @@ void pauseScreen() {
     while ((c = getchar()) != '\n' && c != EOF);
     getchar();
 }
-void flushInput() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
+
 void toLowerStr(const char* src, char* dst) {
     int i = 0;
     while (src[i] != '\0') {
@@ -141,18 +138,21 @@ void toLowerStr(const char* src, char* dst) {
     }
     dst[i] = '\0';
 }
+
 int strCmpCI(const char* a, const char* b) {
     char la[MAX_STR], lb[MAX_STR];
     toLowerStr(a, la);
     toLowerStr(b, lb);
     return strcmp(la, lb);
 }
+
 int containsStr(const char* haystack, const char* needle) {
     char h[MAX_STR], n[MAX_STR];
     toLowerStr(haystack, h);
     toLowerStr(needle, n);
     return strstr(h, n) != NULL;
 }
+
 void formatRupiah(double angka, char* hasil) {
     char buf[64];
     sprintf(buf, "%.0f", angka);
@@ -178,14 +178,17 @@ void formatRupiah(double angka, char* hasil) {
 
     sprintf(hasil, "Rp %s", out);
 }
+
 void printBorder(int lebar) {
     for (int i = 0; i < lebar; i++) printf("=");
     printf("\n");
 }
+
 void printLine(int lebar) {
     for (int i = 0; i < lebar; i++) printf("-");
     printf("\n");
 }
+
 void printTitle(const char* judul, int lebar) {
     printBorder(lebar);
     int panjangJudul = strlen(judul);
@@ -194,6 +197,7 @@ void printTitle(const char* judul, int lebar) {
     printf("%s\n", judul);
     printBorder(lebar);
 }
+
 void generateID(char* hasil) {
     sprintf(hasil, "MB%04d", jumlahMobil + 1001);
 }
@@ -278,7 +282,7 @@ void bacaStringOpsional(char* hasil, int maxLen) {
 }
 
 // ============================================================
-//  FUNGSI SIMPAN DAN MUAT FILE 
+//  FUNGSI SIMPAN DAN MUAT FILE (Berbasis Linked List)
 // ============================================================
 void simpanMobil() {
     FILE* f = fopen("mobil.dat", "w");
@@ -475,7 +479,7 @@ void outputMobil(NodeMobil* head, int n) {
 }
 
 // ============================================================
-//  FUNGSI-FUNGSI SORTING (PENGURUTAN)
+//  FUNGSI-FUNGSI SORTING (Berjalan diatas Linked List)
 // ============================================================
 void swapMobil(Mobil& a, Mobil& b) {
     Mobil sementara = a;
@@ -1129,7 +1133,7 @@ int login(char* namaUserOut) {
 // ============================================================
 //  FUNGSI MAIN
 // ============================================================
-int main(){
+int main() {
     muatAkun();
     muatMobil();
 
