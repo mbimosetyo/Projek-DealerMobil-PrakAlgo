@@ -44,15 +44,16 @@ struct NodeAkun {
 // ============================================================
 //  DATA GLOBAL - LINKED LIST POINTERS
 // ============================================================
-NodeMobil* headMobil = NULL;
+NodeMobil* headMobil = NULL; // NULL berarti list kosong
 int jumlahMobil = 0;
 
-NodeAkun* headAkun = NULL;
+NodeAkun* headAkun = NULL; // NULL berarti list kosong
 int jumlahAkun = 0;
 
 // ============================================================
 //  FUNGSI PEMBANTU LINKED LIST
 // ============================================================
+// Menyisipkan data Mobil baru ke posisi paling akhir linked list
 void insertLastMobil(NodeMobil*& head, Mobil m) {
     NodeMobil* newNode = new NodeMobil{m, NULL};
     if (!head) {
@@ -65,7 +66,8 @@ void insertLastMobil(NodeMobil*& head, Mobil m) {
     }
     curr->next = newNode;
 }
-
+    
+// Menyisipkan data Akun baru ke posisi paling akhir linked list
 void insertLastAkun(NodeAkun*& head, Akun a) {
     NodeAkun* newNode = new NodeAkun{a, NULL};
     if (!head) {
@@ -79,6 +81,7 @@ void insertLastAkun(NodeAkun*& head, Akun a) {
     curr->next = newNode;
 }
 
+// Menghapus seluruh linked list Mobil dari memori
 void freeListMobil(NodeMobil*& head) {
     while (head) {
         NodeMobil* temp = head;
@@ -87,6 +90,7 @@ void freeListMobil(NodeMobil*& head) {
     }
 }
 
+// Membuat salinan (deep copy) dari linked list Mobil, digunakan agar sorting tidak mengubah data asli
 NodeMobil* copyListMobil(NodeMobil* head) {
     if (!head) return NULL;
     NodeMobil* newHead = new NodeMobil{head->data, NULL};
@@ -100,7 +104,7 @@ NodeMobil* copyListMobil(NodeMobil* head) {
     return newHead;
 }
 
-// Fungsi helper agar sorting tetap bisa menggunakan index (O(N) traversal per akses)
+// Mengambil node ke-index dari linked list (0-based), dipakai oleh binary search
 NodeMobil* getNodeAt(NodeMobil* head, int index) {
     NodeMobil* curr = head;
     for (int i = 0; i < index && curr != NULL; i++) {
@@ -112,6 +116,7 @@ NodeMobil* getNodeAt(NodeMobil* head, int index) {
 // ============================================================
 //  FUNGSI-FUNGSI PEMBANTU UTILITIES
 // ============================================================
+// Membersihkan layar terminal, menggunakan perintah berbeda tergantung OS
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -120,6 +125,7 @@ void clearScreen() {
 #endif
 }
 
+// Menunggu pengguna menekan Enter sebelum melanjutkan
 void pauseScreen() {
     printf("\n  Tekan Enter untuk melanjutkan...");
     int c;
@@ -127,11 +133,12 @@ void pauseScreen() {
     getchar();
 }
 
+// Mengonversi string ke huruf kecil semua; dipakai untuk perbandingan case-insensitive
 void toLowerStr(const char* src, char* dst) {
     int i = 0;
     while (src[i] != '\0') {
         if (src[i] >= 'A' && src[i] <= 'Z')
-            dst[i] = src[i] + 32;
+            dst[i] = src[i] + 32;   // Selisih ASCII antara huruf besar dan kecil adalah 32
         else
             dst[i] = src[i];
         i++;
@@ -139,6 +146,7 @@ void toLowerStr(const char* src, char* dst) {
     dst[i] = '\0';
 }
 
+// Membandingkan dua string tanpa memedulikan besar-kecil huruf (case-insensitive)
 int strCmpCI(const char* a, const char* b) {
     char la[MAX_STR], lb[MAX_STR];
     toLowerStr(a, la);
@@ -146,22 +154,25 @@ int strCmpCI(const char* a, const char* b) {
     return strcmp(la, lb);
 }
 
+// Mengecek apakah string needle ada di dalam string haystack (pencarian substring)
 int containsStr(const char* haystack, const char* needle) {
-    char h[MAX_STR], n[MAX_STR];
+    char h[MAX_STR], n[MAX_STR];    // strstr: fungsi standar C yang mencari posisi substring, mengembalikan NULL jika tidak ditemukan
     toLowerStr(haystack, h);
     toLowerStr(needle, n);
     return strstr(h, n) != NULL;
 }
 
+// Mengformat angka menjadi format Rupiah dengan pemisah ribuan (titik), contoh: Rp 150.000.000
 void formatRupiah(double angka, char* hasil) {
     char buf[64];
-    sprintf(buf, "%.0f", angka);
+    sprintf(buf, "%.0f", angka);    // Ubah angka jadi string tanpa desimal
 
     int panjang = strlen(buf);
     int hitungTitik = 0;
     int j = 0;
     char balik[64];
 
+    // Proses terbalik: sisipkan titik setiap 3 digit dari belakang
     for (int i = panjang - 1; i >= 0; i--) {
         if (hitungTitik > 0 && hitungTitik % 3 == 0)
             balik[j++] = '.';
@@ -170,6 +181,7 @@ void formatRupiah(double angka, char* hasil) {
     }
     balik[j] = '\0';
 
+    // Balikkan kembali string ke urutan yang benar
     char out[64];
     int panjangBalik = strlen(balik);
     for (int i = 0; i < panjangBalik; i++)
@@ -179,16 +191,19 @@ void formatRupiah(double angka, char* hasil) {
     sprintf(hasil, "Rp %s", out);
 }
 
+// Mencetak garis pembatas berupa karakter '=' sebanyak lebar karakter
 void printBorder(int lebar) {
     for (int i = 0; i < lebar; i++) printf("=");
     printf("\n");
 }
 
+// Mencetak garis pembatas berupa karakter '-' sebanyak lebar karakter
 void printLine(int lebar) {
     for (int i = 0; i < lebar; i++) printf("-");
     printf("\n");
 }
 
+// Mencetak judul tabel/halaman dengan border '=' di atas dan bawah, teks otomatis ditengahkan
 void printTitle(const char* judul, int lebar) {
     printBorder(lebar);
     int panjangJudul = strlen(judul);
@@ -198,6 +213,7 @@ void printTitle(const char* judul, int lebar) {
     printBorder(lebar);
 }
 
+// Menghasilkan ID unik untuk mobil baru dalam format "MB1001", "MB1002", dst.
 void generateID(char* hasil) {
     sprintf(hasil, "MB%04d", jumlahMobil + 1001);
 }
@@ -205,24 +221,26 @@ void generateID(char* hasil) {
 // ============================================================
 //  ERROR HANDLING INPUT
 // ============================================================
+// Membaca input bilangan bulat (integer) dari pengguna dengan validasi karakter
 int bacaInt(int* hasil) {
     char buf[MAX_STR];
     if (!fgets(buf, MAX_STR, stdin)) return 0;
-    buf[strcspn(buf, "\n")] = '\0';
+    buf[strcspn(buf, "\n")] = '\0';     // strcspn: cari posisi '\n', lalu ganti dengan null terminator
     if (strlen(buf) == 0) return 0;
     int mulai = 0;
-    if (buf[0] == '-') mulai = 1;
+    if (buf[0] == '-') mulai = 1;       // Izinkan tanda minus untuk angka negatif
     if (mulai == 1 && strlen(buf) == 1) return 0;
     for (int i = mulai; buf[i] != '\0'; i++) {
-        if (buf[i] < '0' || buf[i] > '9') {
+        if (buf[i] < '0' || buf[i] > '9') {     // Pastikan semua karakter adalah digit
             printf("  [!] Input tidak valid! Harap masukkan angka.\n");
             return 0;
         }
     }
-    *hasil = atoi(buf);
+    *hasil = atoi(buf);     // atoi: konversi string ke integer
     return 1;
 }
 
+// Membaca input bilangan desimal (double) dari pengguna dengan validasi format angka
 int bacaDouble(double* hasil) {
     char buf[MAX_STR];
     if (!fgets(buf, MAX_STR, stdin)) return 0;
@@ -244,10 +262,11 @@ int bacaDouble(double* hasil) {
             return 0;
         }
     }
-    *hasil = atof(buf);
+    *hasil = atof(buf);     // atof: konversi string ke double
     return 1;
 }
 
+// Membaca input pilihan menu (angka non-negatif) dengan validasi
 int bacaMenu(int* hasil) {
     char buf[MAX_STR];
     if (!fgets(buf, MAX_STR, stdin)) return 0;
@@ -266,6 +285,7 @@ int bacaMenu(int* hasil) {
     return 1;
 }
 
+// Membaca input string wajib isi dari pengguna; menolak input kosong
 int bacaString(char* hasil, int maxLen, const char* labelField) {
     fgets(hasil, maxLen, stdin);
     hasil[strcspn(hasil, "\n")] = '\0';
@@ -276,6 +296,7 @@ int bacaString(char* hasil, int maxLen, const char* labelField) {
     return 1;
 }
 
+// Membaca input string opsional (boleh kosong), dipakai saat mengedit data agar bisa dilewati
 void bacaStringOpsional(char* hasil, int maxLen) {
     fgets(hasil, maxLen, stdin);
     hasil[strcspn(hasil, "\n")] = '\0';
@@ -284,6 +305,7 @@ void bacaStringOpsional(char* hasil, int maxLen) {
 // ============================================================
 //  FUNGSI SIMPAN DAN MUAT FILE (Berbasis Linked List)
 // ============================================================
+// Menyimpan seluruh data mobil dari linked list ke file "mobil.dat"
 void simpanMobil() {
     FILE* f = fopen("mobil.dat", "w");
     if (!f) return;
@@ -297,6 +319,7 @@ void simpanMobil() {
     fclose(f);
 }
 
+// Memuat data mobil dari file "mobil.dat" ke dalam linked list saat program dijalankan
 void muatMobil() {
     FILE* f = fopen("mobil.dat", "r");
     if (!f) return;
@@ -308,6 +331,7 @@ void muatMobil() {
         int panjang = strlen(baris);
         if (panjang > 0 && baris[panjang - 1] == '\n') baris[panjang - 1] = '\0';
         Mobil m;
+        // strtok: memecah string berdasarkan delimiter '|', mengembalikan token satu per satu
         char* tok = strtok(baris, "|"); if (!tok) continue; strcpy(m.id,    tok);
         tok = strtok(NULL, "|");        if (!tok) continue; strcpy(m.nama,  tok);
         tok = strtok(NULL, "|");        if (!tok) continue; strcpy(m.tipe,  tok);
@@ -321,6 +345,7 @@ void muatMobil() {
     fclose(f);
 }
 
+// Menyimpan seluruh data akun dari linked list ke file "akun.dat"
 void simpanAkun() {
     FILE* f = fopen("akun.dat", "w");
     if (!f) return;
@@ -335,10 +360,12 @@ void simpanAkun() {
     fclose(f);
 }
 
+// Memuat data akun dari file "akun.dat" ke dalam linked list saat program dijalankan
 void muatAkun() {
     FILE* f = fopen("akun.dat", "r");
     if (!f) return;
     
+    // Bersihkan linked list akun lama sebelum mengisi ulang dari file
     while(headAkun) {
         NodeAkun* temp = headAkun;
         headAkun = headAkun->next;
@@ -363,12 +390,14 @@ void muatAkun() {
 // ============================================================
 //  FUNGSI CETAK TABEL MOBIL
 // ============================================================
+// Mencetak baris header kolom tabel mobil beserta garis pemisah di bawahnya
 void cetakHeaderMobil() {
     printf("%-8s %-22s %-12s %-10s %-6s %-18s %-6s\n",
            "ID", "Nama Mobil", "Tipe", "Warna", "Tahun", "Harga", "Stok");
     printLine(86);
 }
 
+// Mencetak satu baris data mobil dalam format kolom yang rata (menggunakan format Rupiah untuk harga)
 void cetakBarisMobil(const Mobil& m) {
     char rp[32];
     formatRupiah(m.harga, rp);
@@ -379,6 +408,7 @@ void cetakBarisMobil(const Mobil& m) {
 // ============================================================
 //  FUNGSI INPUT MOBIL
 // ============================================================
+// Menangani proses penginputan data mobil baru oleh pengguna
 void inputMobil() {
     clearScreen();
     printTitle("  INPUT DATA MOBIL  ", 60);
@@ -457,6 +487,7 @@ void inputMobil() {
 // ============================================================
 //  FUNGSI OUTPUT MOBIL
 // ============================================================
+// Menampilkan seluruh data mobil dalam linked list ke layar dalam bentuk tabel
 void outputMobil(NodeMobil* head, int n) {
     clearScreen();
     printTitle("  DATA MOBIL DEALER  ", 86);
@@ -481,6 +512,7 @@ void outputMobil(NodeMobil* head, int n) {
 // ============================================================
 //  FUNGSI-FUNGSI SORTING (Berjalan diatas Linked List)
 // ============================================================
+// Menukar isi data dua node Mobil (swap by value, bukan swap pointer)
 void swapMobil(Mobil& a, Mobil& b) {
     Mobil sementara = a;
     a = b;
@@ -510,6 +542,7 @@ int compareField(const Mobil& a, const Mobil& b, int field) {
     }
 }
 
+// Menentukan apakah dua data perlu ditukar berdasarkan field dan arah pengurutan
 bool shouldSwap(const Mobil& a, const Mobil& b, int field, bool asc) {
     int hasil = compareField(a, b, field);
     return asc ? (hasil > 0) : (hasil < 0);
@@ -547,6 +580,7 @@ void selectionSort(NodeMobil* head, int n, int field, bool asc) {
 // ============================================================
 //  MENU SORTING
 // ============================================================
+// Menampilkan menu interaktif untuk memilih metode dan arah sorting, lalu menampilkan hasilnya
 void menuSorting() {
     int pil, pilArah;
 
@@ -622,12 +656,13 @@ void menuSorting() {
 // ============================================================
 //  FUNGSI-FUNGSI SEARCHING (PENCARIAN)
 // ============================================================
+// Sequential Search: periksa setiap elemen satu per satu dari awal hingga akhir
 int sequentialSearch(const char* kata_kunci, NodeMobil*& hasilHead) {
     int count = 0;
     NodeMobil* curr = headMobil;
     while (curr) {
-        if (containsStr(curr->data.nama, kata_kunci)) {
-            insertLastMobil(hasilHead, curr->data);
+        if (containsStr(curr->data.nama, kata_kunci)) {     // Cocokkan kata kunci dengan nama mobil
+            insertLastMobil(hasilHead, curr->data);         // Tambahkan ke list hasil jika cocok
             count++;
         }
         curr = curr->next;
@@ -635,6 +670,7 @@ int sequentialSearch(const char* kata_kunci, NodeMobil*& hasilHead) {
     return count;
 }
 
+// Binary Search: hanya bekerja pada data TERURUT; bagi dua rentang pencarian setiap iterasi
 int binarySearch(const char* kata_kunci, NodeMobil*& hasilHead) {
     NodeMobil* tmpHead = copyListMobil(headMobil);
     bubbleSort(tmpHead, jumlahMobil, 1, true); 
@@ -647,11 +683,11 @@ int binarySearch(const char* kata_kunci, NodeMobil*& hasilHead) {
         int mid = (lo + hi) / 2;
         toLowerStr(getNodeAt(tmpHead, mid)->data.tipe, fieldStr);
         int cmp = strcmp(fieldStr, kw);
-        if      (cmp == 0) { tengah = mid; break; }
-        else if (cmp < 0)    lo = mid + 1;
-        else                 hi = mid - 1;
+        if      (cmp == 0) { tengah = mid; break; }     // Ditemukan
+        else if (cmp < 0)    lo = mid + 1;              // Cari di separuh kanan
+        else                 hi = mid - 1;              // Cari di separuh kiri
     }
-
+    // Kata kunci tidak ditemukan sama sekali
     if (tengah == -1) {
         freeListMobil(tmpHead);
         return 0;
@@ -681,6 +717,7 @@ int binarySearch(const char* kata_kunci, NodeMobil*& hasilHead) {
 // ============================================================
 //  MENU SEARCHING
 // ============================================================
+// Menampilkan menu interaktif untuk pencarian data mobil
 void menuSearching() {
     int pil, pilArah;
 
@@ -778,6 +815,7 @@ void menuSearching() {
 // ============================================================
 //  FUNGSI DELETE (HAPUS) DATA MOBIL
 // ============================================================
+// Menangani penghapusan data mobil dari linked list berdasarkan ID yang dimasukkan pengguna
 void deleteMobil() {
     char idCari[MAX_STR];
     char konfirmasi[MAX_STR];
@@ -805,7 +843,7 @@ void deleteMobil() {
             pauseScreen();
             continue;
         }
-
+        // Cari node dengan ID yang cocok
         NodeMobil* curr = headMobil;
         NodeMobil* prev = NULL;
         
@@ -842,13 +880,13 @@ void deleteMobil() {
 
         if (konfirmasi[0] == 'y' || konfirmasi[0] == 'Y') {
             if (prev == NULL) {
-                headMobil = curr->next;
+                headMobil = curr->next;     // Hapus node head: geser head ke node berikutnya
             } else {
-                prev->next = curr->next;
+                prev->next = curr->next;    // Hapus node tengah/akhir: hubungkan node sebelumnya dengan node setelahnya
             }
-            delete curr;
+            delete curr;                    // Bebaskan memori node yang dihapus
             jumlahMobil--;
-            simpanMobil();
+            simpanMobil();                  // Perbarui file setelah penghapusan
             printf("  [v] Data berhasil dihapus!\n");
         } else {
             printf("  Penghapusan dibatalkan.\n");
@@ -860,6 +898,7 @@ void deleteMobil() {
 // ============================================================
 //  FUNGSI EDIT DATA MOBIL
 // ============================================================
+// Menangani pengeditan data mobil yang sudah ada
 void editMobil() {
     char idCari[MAX_STR];
     char tmpBuf[MAX_STR];
@@ -887,7 +926,7 @@ void editMobil() {
             pauseScreen();
             continue;
         }
-
+        // Telusuri linked list untuk menemukan node dengan ID yang sesuai
         NodeMobil* curr = headMobil;
         while (curr != NULL) {
             if (strCmpCI(curr->data.id, idCari) == 0) {
@@ -909,7 +948,7 @@ void editMobil() {
         cetakBarisMobil(m);
         printBorder(86);
         printf("\n  (Langsung Enter = tidak diubah)\n\n");
-
+        // Untuk setiap field: baca input opsional; jika tidak kosong, perbarui nilai
         printf("  Nama Mobil  [%s]: ", m.nama);
         bacaStringOpsional(tmpBuf, MAX_STR);
         if (strlen(tmpBuf) > 0) strcpy(m.nama, tmpBuf);
@@ -976,6 +1015,7 @@ void editMobil() {
 // ============================================================
 //  MENU UTAMA
 // ============================================================
+// Menampilkan dan mengelola menu utama aplikasi setelah pengguna berhasil login
 void mainMenu(const char* namaUser) {
     int pil;
     while (1) {
@@ -1018,6 +1058,7 @@ void mainMenu(const char* namaUser) {
 // ============================================================
 //  FUNGSI LOGIN & BUAT AKUN
 // ============================================================
+// Mengecek apakah username tertentu sudah terdaftar di linked list akun
 int usernameAda(const char* user) {
     NodeAkun* curr = headAkun;
     while (curr) {
@@ -1027,6 +1068,7 @@ int usernameAda(const char* user) {
     return 0;
 }
 
+// Menangani proses pendaftaran akun baru oleh pengguna dengan validasi username unik dan password minimal
 void buatAkun() {
     clearScreen();
     printTitle("  BUAT AKUN BARU  ", 60);
@@ -1057,7 +1099,7 @@ void buatAkun() {
             printf("  Password     : ");
             continue;
         }
-        if ((int)strlen(a.password) < 4) {
+        if ((int)strlen(a.password) < 4) {      // Minimal 4 karakter untuk keamanan dasar
             printf("  [!] Password minimal 4 karakter!\n");
             printf("  Password     : ");
             continue;
@@ -1072,6 +1114,8 @@ void buatAkun() {
     pauseScreen();
 }
 
+
+// Menangani proses login pengguna dengan batas maksimal percobaan (MAX_LOGIN kali)
 int login(char* namaUserOut) {
     int percobaan = 0;
 
@@ -1100,7 +1144,7 @@ int login(char* namaUserOut) {
         while (curr) {
             if (strCmpCI(curr->data.username, user) == 0 &&
                 strcmp(curr->data.password, pass) == 0) {
-                strcpy(namaUserOut, curr->data.nama_lengkap);
+                strcpy(namaUserOut, curr->data.nama_lengkap);   // Salin nama lengkap untuk ditampilkan
                 return 1;
             }
             curr = curr->next;
@@ -1137,6 +1181,7 @@ int main() {
     muatAkun();
     muatMobil();
 
+    // Jika belum ada akun sama sekali, buat akun admin default secara otomatis
     if (jumlahAkun == 0) {
         Akun a;
         strcpy(a.username,     "admin");
@@ -1150,6 +1195,7 @@ int main() {
     int pil;
     char namaUser[MAX_STR];
 
+    // Loop menu awal: terus tampilkan pilihan hingga pengguna memilih Keluar
     while (1) {
         clearScreen();
         printf("\n");
@@ -1176,19 +1222,19 @@ int main() {
                 printf("\n  [v] Login berhasil! Selamat datang, %s\n", namaUser);
                 printf("\n  Tekan Enter untuk masuk ke menu utama...");
                 getchar();
-                mainMenu(namaUser);
+                mainMenu(namaUser);     // Masuk ke menu utama setelah login berhasil
             }
         } else if (pil == 2) {
             buatAkun();
         } else {
             printf("\n  Sampai jumpa!\n\n");
-            break;
+            break;                      // Keluar dari loop, lanjut ke pembebasan memori
         }
     }
 
     // Bebaskan memori sebelum program berakhir (Good Practice)
     freeListMobil(headMobil);
-    while (headAkun) {
+    while (headAkun) {          // Hapus semua node linked list akun secara manual
         NodeAkun* temp = headAkun;
         headAkun = headAkun->next;
         delete temp;
